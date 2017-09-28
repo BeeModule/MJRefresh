@@ -9,6 +9,9 @@
 #import "MJRefreshAutoFooter.h"
 
 @interface MJRefreshAutoFooter()
+
+@property (nonatomic, assign) double lastInterval;
+
 @end
 
 @implementation MJRefreshAutoFooter
@@ -77,6 +80,10 @@
             CGPoint new = [change[@"new"] CGPointValue];
             if (new.y <= old.y) return;
             
+            double nowInterval = [NSDate new].timeIntervalSince1970;
+            if (nowInterval - self.lastInterval < 1) {
+                return;
+            }
             // 当底部刷新控件完全出现时，才刷新
             [self beginRefreshing];
         }
@@ -111,6 +118,7 @@
             [self executeRefreshingCallback];
         });
     } else if (state == MJRefreshStateNoMoreData || state == MJRefreshStateIdle) {
+        self.lastInterval = [NSDate new].timeIntervalSince1970;
         if (MJRefreshStateRefreshing == oldState) {
             if (self.endRefreshingCompletionBlock) {
                 self.endRefreshingCompletionBlock();
